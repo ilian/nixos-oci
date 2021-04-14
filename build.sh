@@ -45,19 +45,32 @@ bucket_ocid=$(
     --query "data.id"
 )
 # Clean up bucket on script termination
-trap 'echo Removing bucket ; oci os bucket delete --force --name "$bucket"' INT TERM EXIT
+trap 'echo Removing temporary bucket; oci os bucket delete --force --name "$bucket"' INT TERM EXIT
 
 echo "Uploading image to temporary bucket"
 oci os object put -bn "$bucket" --file "$qcow"
 
 echo "Importing image as a Custom Image"
-oci compute image import from-object \
-  -c "$root_ocid" \
-  -bn "$bucket" \
-  --name nixos.qcow2 \
-  --operating-system NixOS \
-  --source-image-type QCOW2 \
-  --launch-mode PARAVIRTUALIZED
+bucket_ns="$(oci os ns get --query "data" --raw-output)"
+image_id="$(
+  oci compute image import from-object \
+    -c "$root_ocid" \
+    --namespace "$bucket_ns" \
+    --bucket-name "$bucket" \
+    --name nixos.qcow2 \
+    --operating-system NixOS \
+    --source-image-type QCOW2 \
+    --launch-mode PARAVIRTUALIZED \
+    --display-name NixOS \
+    --raw-output \
+    --query "data.id"
+)"
 
 echo "Deleting image from bucket"
 oci os object delete -bn "$bucket" --object-name nixos.qcow2
+
+cat - <<EOF
+Image created! Please mark all available shapes as compatible with this image by
+visiting the following link and by selecting the 'Edit Details' button on:
+https://cloud.oracle.com/compute/images/$image_id
+EOF

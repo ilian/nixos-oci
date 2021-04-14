@@ -2,8 +2,8 @@ set -eo pipefail
 
 cat - <<EOF
 This script will locally build a NixOS image and upload it as a Custom Image
-using the oci-cli. Make sure that an API key for the tenancy administrator has
-been added to '~/.oci'.
+using oci-cli. Make sure that an API key for the tenancy administrator has been
+added to '~/.oci'.
 For more info about configuring oci-cli, please visit
 https://docs.cloud.oracle.com/iaas/Content/API/Concepts/apisigningkey.htm#Required_Keys_and_OCIDs
 

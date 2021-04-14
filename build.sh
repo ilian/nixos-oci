@@ -66,11 +66,15 @@ image_id="$(
     --query "data.id"
 )"
 
-echo "Deleting image from bucket"
-oci os object delete -bn "$bucket" --object-name nixos.qcow2 --force
-
 cat - <<EOF
 Image created! Please mark all available shapes as compatible with this image by
 visiting the following link and by selecting the 'Edit Details' button on:
 https://cloud.oracle.com/compute/images/$image_id
 EOF
+
+# Workaround until https://github.com/oracle/oci-cli/issues/399 is addressed
+echo "Sleeping for 5 minutes before cleaning up files in the temporary bucket"
+sleep $((5 * 60))
+
+echo "Deleting image from bucket"
+oci os object delete -bn "$bucket" --object-name nixos.qcow2 --force

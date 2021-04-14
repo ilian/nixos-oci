@@ -67,7 +67,7 @@ image_id="$(
 )"
 
 echo "Deleting image from bucket"
-oci os object delete -bn "$bucket" --object-name nixos.qcow2
+oci os object delete -bn "$bucket" --object-name nixos.qcow2 --force
 
 cat - <<EOF
 Image created! Please mark all available shapes as compatible with this image by
